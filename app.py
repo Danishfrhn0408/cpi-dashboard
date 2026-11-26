@@ -1,10 +1,16 @@
 import duckdb
 import plotly.express as px
 import streamlit as st
+import os
+import subprocess
+import sys
 
-st.set_page_config(page_title="Inflasi Malaysia (CPI)", layout="wide")
-st.title("Inflasi Malaysia (CPI)")
-st.caption("Sumber: OpenDOSM. Indeks asas 2010 = 100")
+if not os.path.exists("data/cpi.duckdb"):
+    os.makedirs("data", exist_ok=True)
+    subprocess.run([sys.executable, "etl.py"], check=True)
+st.set_page_config(page_title="Malaysia Inflation (CPI)", layout="wide")
+st.title("Malaysia Inflation (CPI)")
+st.caption("Source: OpenDOSM. Index base 2010 = 100")
 
 
 @st.cache_data
@@ -19,11 +25,11 @@ df = load()
 
 # Penapis di sisi
 states = st.sidebar.multiselect(
-    "Negeri", sorted(df["state"].unique()), default=["Selangor"]
+    "State", sorted(df["state"].unique()), default=["Selangor"]
 )
 cats = sorted(df["division_name"].dropna().unique())
 cat = st.sidebar.selectbox(
-    "Kategori", cats, index=cats.index("Keseluruhan") if "Keseluruhan" in cats else 0
+    "Category", cats, index=cats.index("Overall") if "Overall" in cats else 0
 )
 
 sel = df[df["state"].isin(states) & (df["division_name"] == cat)]
@@ -35,24 +41,24 @@ if states:
     if not cur.empty:
         cols = st.columns(len(cur))
         for c, (_, r) in zip(cols, cur.iterrows()):
-            c.metric(f"{r['state']} (inflasi tahunan)", f"{r['yoy_pct']:.2f}%")
+            c.metric(f"{r['state']} (annual inflation)", f"{r['yoy_pct']:.2f}%")
 
 # Carta 1: indeks
-st.subheader("Trend indeks harga")
+st.subheader("Price index trend")
 st.plotly_chart(
     px.line(sel, x="date", y="cpi_index", color="state"),
-    use_container_width=True,
+    width="stretch",
 )
 
 # Carta 2: inflasi tahunan
-st.subheader("Inflasi tahunan (%)")
+st.subheader("Annual inflation (%)")
 st.plotly_chart(
     px.line(sel.dropna(subset=["yoy_pct"]), x="date", y="yoy_pct", color="state"),
-    use_container_width=True,
+    width="stretch",
 )
 
 # Carta 3: perbandingan negeri
-st.subheader(f"Perbandingan negeri: {cat} (bulan terkini)")
+st.subheader(f"State comparison: {cat} (latest month)")
 comp = (
     df[(df["division_name"] == cat) & (df["date"] == latest)]
     .dropna(subset=["yoy_pct"])
@@ -60,5 +66,5 @@ comp = (
 )
 st.plotly_chart(
     px.bar(comp, x="yoy_pct", y="state", orientation="h"),
-    use_container_width=True,
+    width="stretch",
 )

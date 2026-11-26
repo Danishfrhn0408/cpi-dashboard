@@ -17,20 +17,20 @@ df = df.dropna(subset=["cpi_index"]).drop_duplicates()
 
 # Lookup nama kategori (semak dengan jadual MCOICOP rasmi OpenDOSM)
 names = {
-    "overall": "Keseluruhan",
-    "01": "Makanan & minuman tidak beralkohol",
-    "02": "Alkohol & tembakau",
-    "03": "Pakaian & kasut",
-    "04": "Perumahan, air, elektrik, gas",
-    "05": "Perabot & peralatan rumah",
-    "06": "Kesihatan",
-    "07": "Pengangkutan",
-    "08": "Maklumat & komunikasi",
-    "09": "Rekreasi, sukan & budaya",
-    "10": "Pendidikan",
-    "11": "Restoran & penginapan",
-    "12": "Insurans & kewangan",
-    "13": "Penjagaan peribadi & lain-lain",
+    "overall": "Overall",
+    "01": "Food & non-alcoholic beverages",
+    "02": "Alcohol & tobacco",
+    "03": "Clothing & footwear",
+    "04": "Housing, water, electricity, gas",
+    "05": "Furnishings & household equipment",
+    "06": "Health",
+    "07": "Transport",
+    "08": "Information & communication",
+    "09": "Recreation, sport & culture",
+    "10": "Education",
+    "11": "Restaurants & accommodation",
+    "12": "Insurance & financial services",
+    "13": "Personal care & other",
 }
 df["division_name"] = df["division"].map(names)
 
